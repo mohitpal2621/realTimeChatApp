@@ -8,12 +8,13 @@ const ChatPage = () => {
 		setChats(data);
 	};
 
-	useEffect(() => {
-		fetchChats();
-	}, []);
+	// useEffect(() => {
+	// 	fetchChats();
+	// }, []);
 
 	return (
 		<div>
+			CHATS
 			{chats.map((chat) => (
 				<div key={chat._id}>{chat.chatName}</div>
 			))}
