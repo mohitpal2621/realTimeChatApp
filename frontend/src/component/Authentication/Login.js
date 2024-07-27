@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
 	Button,
@@ -46,10 +45,20 @@ const Login = () => {
 				},
 			};
 
-			const { data } = await axios.post("/api/user/login", {
-				email,
-				password,
+			const response = await fetch("/api/user/login", {
+				method: "POST",
+				headers: config.headers,
+				body: JSON.stringify({
+					email,
+					password,
+				}),
 			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || "Something went wrong");
+			}
 
 			toast({
 				title: "Login successful",
@@ -59,7 +68,6 @@ const Login = () => {
 				position: "bottom",
 			});
 
-			localStorage.setItem("userInfo", JSON.stringify(data));
 			setLoading(false);
 			navigate("/chats");
 		} catch (error) {

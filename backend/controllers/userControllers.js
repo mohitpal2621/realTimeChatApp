@@ -20,12 +20,20 @@ const registerUser = asyncHandler(async (req, res) => {
 	const user = await User.create({ name, email, password, picture });
 
 	if (user) {
+		const token = generateToken(user._id);
+
+		res.cookie("tokenId", token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			maxAge: 30 * 24 * 60 * 60 * 1000,
+			sameSite: "Lax",
+		});
+
 		res.status(201).json({
 			_id: user._id,
 			name: user.name,
 			email: user.email,
 			picture: user.picture,
-			token: generateToken(user._id),
 		});
 	} else {
 		res.status(400);
@@ -38,14 +46,21 @@ const authUser = asyncHandler(async (req, res) => {
 
 	const user = await User.findOne({ email });
 
-	// user OR User	;	ALSO compare
 	if (user && (await user.matchPassword(password))) {
+		const token = generateToken(user._id);
+
+		res.cookie("tokenIdLogin", token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			maxAge: 30 * 24 * 60 * 60 * 1000,
+			sameSite: "Lax",
+		});
+
 		res.json({
 			_id: user._id,
 			name: user.name,
 			email: user.email,
 			picture: user.picture,
-			token: generateToken(user._id),
 		});
 		console.log("DONE you are Logged IN");
 	} else {
@@ -53,4 +68,18 @@ const authUser = asyncHandler(async (req, res) => {
 	}
 });
 
-module.exports = { registerUser, authUser };
+const allUsers = asyncHandler(async (req, res) => {
+	const keyword = req.query.search
+		? {
+				$or: [
+					{ name: { $regex: req.query.search, $options: "i" } },
+					{ email: { $regex: req.query.search, $options: "i" } },
+				],
+		  }
+		: {};
+
+	const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+	res.send(users);
+});
+
+module.exports = { registerUser, authUser, allUsers };

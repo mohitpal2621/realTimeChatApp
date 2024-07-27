@@ -10,7 +10,7 @@ import {
 	useToast,
 	VStack,
 } from "@chakra-ui/react";
-import axios from "axios";
+// import axios from "axios";
 
 const Signup = () => {
 	const [show, setShow] = useState(false);
@@ -107,16 +107,22 @@ const Signup = () => {
 				},
 			};
 
-			const { data } = await axios.post(
-				"/api/user",
-				{
+			const response = await fetch("/api/user", {
+				method: "POST",
+				headers: config.headers,
+				body: JSON.stringify({
 					name,
 					email,
 					password,
 					picture: pic,
-				},
-				config
-			);
+				}),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || "Something went wrong");
+			}
 
 			toast({
 				title: "Registration is successful",
@@ -126,7 +132,6 @@ const Signup = () => {
 				position: "bottom",
 			});
 
-			localStorage.setItem("userInfo", JSON.stringify(data));
 			setLoading(false);
 			navigate("/chats");
 		} catch (error) {
