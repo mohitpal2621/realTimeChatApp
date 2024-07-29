@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Login from "../component/Authentication/Login";
 import Signup from "../component/Authentication/Signup";
 import {
@@ -11,8 +11,21 @@ import {
 	TabPanels,
 	TabPanel,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+import { ChatState } from "../Context/ChatProvider"; // Import ChatState to access the user context
 
 const HomePage = () => {
+	const navigate = useNavigate();
+	const { user } = ChatState(); // Get the user state from the ChatProvider context
+
+	useEffect(() => {
+		console.log("User state:", user);
+		// If a valid user is present, navigate to "/chats"
+		if (user) {
+			navigate("/chats");
+		}
+	}, [user, navigate]);
+
 	return (
 		<Container maxW="xl" centerContent>
 			<Box

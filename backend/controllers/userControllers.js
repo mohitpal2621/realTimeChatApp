@@ -68,6 +68,11 @@ const authUser = asyncHandler(async (req, res) => {
 	}
 });
 
+const logOutUser = asyncHandler(async (req, res) => {
+	res.clearCookie("tokenIdLogin");
+	res.status(200).json({ message: "Logout successful" });
+});
+
 const allUsers = asyncHandler(async (req, res) => {
 	const keyword = req.query.search
 		? {
@@ -78,8 +83,10 @@ const allUsers = asyncHandler(async (req, res) => {
 		  }
 		: {};
 
-	const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+	const users = await User.find(keyword)
+		.find({ _id: { $ne: req.user._id } })
+		.select("-password");
 	res.send(users);
 });
 
-module.exports = { registerUser, authUser, allUsers };
+module.exports = { registerUser, authUser, logOutUser, allUsers };
