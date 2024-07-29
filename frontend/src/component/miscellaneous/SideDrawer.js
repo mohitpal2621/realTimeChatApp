@@ -46,6 +46,10 @@ const SideDrawer = () => {
 				credentials: "include",
 			});
 
+			const logOut = await response.json();
+
+			console.log(logOut);
+
 			if (response.ok) {
 				setUser(null);
 				navigate("/");
@@ -104,7 +108,7 @@ const SideDrawer = () => {
 			};
 
 			const response = await fetch("/api/chat", config);
-			const data = response.json();
+			const data = await response.json();
 
 			if (!chats.find((c) => c._id === data._id))
 				setChats([data, ...chats]);
@@ -135,7 +139,6 @@ const SideDrawer = () => {
 				p="5px 10px 5px 10px"
 				borderWidth={"5px"}
 			>
-				{/* SearchUser  */}
 				<Tooltip
 					label="Search users to chat"
 					hasArrow

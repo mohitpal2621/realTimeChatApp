@@ -44,7 +44,7 @@ const MyChats = () => {
 				if (response.ok) {
 					const data = await response.json();
 					setLoggedUser(data.user);
-					fetchChats();
+					await fetchChats();
 				} else {
 					throw new Error("Token Verification Failed");
 					// navigate("/");
@@ -56,6 +56,10 @@ const MyChats = () => {
 
 		getToken();
 	}, []);
+
+	if (!loggedUser || !chats) {
+		return <ChatLoading />;
+	}
 
 	console.log("Selected CHat: ", selectedChat);
 	return (

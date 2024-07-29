@@ -83,6 +83,8 @@ const allUsers = asyncHandler(async (req, res) => {
 		  }
 		: {};
 
+	// Sends array of documents filtered with keyword, and excluding password
+	// from each document, and also excluding the whole document of the current logged user
 	const users = await User.find(keyword)
 		.find({ _id: { $ne: req.user._id } })
 		.select("-password");

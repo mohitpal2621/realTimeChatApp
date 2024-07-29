@@ -2,7 +2,6 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const chats = require("./data/data");
-const jwt = require("jsonwebtoken");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
