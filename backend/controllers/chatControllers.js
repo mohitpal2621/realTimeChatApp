@@ -5,8 +5,6 @@ const User = require("../models/userModel");
 const accessChat = asyncHandler(async (req, res) => {
 	const { userId } = req.body;
 
-	// console.log("USER:", req.user);
-
 	if (!userId) {
 		console.log("UserId param not sent with request");
 		return res.sendStatus(400);
@@ -22,20 +20,14 @@ const accessChat = asyncHandler(async (req, res) => {
 		.populate("users", "-password")
 		.populate("latestMessage");
 
-	// console.log(isChat);
-	// console.log("--------------------");
-
 	isChat = await User.populate(isChat, {
 		path: "latestMessage.sender",
 		select: "name picture email",
 	});
-	// console.log(isChat);
 
 	if (isChat.length > 0) {
 		res.send(isChat[0]);
-		// console.log("This is access chat");
 	} else {
-		// console.log("This is NEW chat");
 		var chatData = {
 			chatName: "sender",
 			isGroupChat: false,
@@ -81,12 +73,18 @@ const fetchChats = asyncHandler(async (req, res) => {
 });
 
 const createGroupChat = asyncHandler(async (req, res) => {
-	// console.log("USERRRR: ", req.user);
 	if (!req.body.users || !req.body.name) {
 		return res.status(400).send({ message: "Please fill all the fields" });
 	}
 
-	let users = JSON.parse(req.body.users);
+	// This array would contain elements, of users' IDs, that are invited to the group to join
+	let users;
+
+	try {
+		users = JSON.parse(req.body.users);
+	} catch (error) {
+		return res.status(400).send({ message: "Invalid users format" });
+	}
 
 	if (users.length < 2) {
 		return res
@@ -96,8 +94,6 @@ const createGroupChat = asyncHandler(async (req, res) => {
 
 	users.push(req.user);
 
-	// console.log(users);
-
 	try {
 		const groupChat = await Chat.create({
 			chatName: req.body.name,
@@ -106,18 +102,17 @@ const createGroupChat = asyncHandler(async (req, res) => {
 			groupAdmin: req.user,
 		});
 
-		// console.log("grp: ", groupChat);
-
 		const fullGroupChat = await Chat.findOne({
 			_id: groupChat._id,
 		})
 			.populate("users", "-password")
 			.populate("groupAdmin", "-password");
 
-		// console.log(fullGroupChat);
-
 		res.status(200).json(fullGroupChat);
-	} catch (error) {}
+	} catch (error) {
+		console.error("Error creating group chat: ", error);
+		res.status(500).send({ message: "Server Error" });
+	}
 });
 
 const renameGroup = asyncHandler(async (req, res) => {
@@ -168,23 +163,50 @@ const addToGroup = asyncHandler(async (req, res) => {
 const removeFromGroup = asyncHandler(async (req, res) => {
 	const { chatId, userId } = req.body;
 
-	const removed = await Chat.findByIdAndUpdate(
-		chatId,
-		{
-			$pull: { users: userId },
-		},
-		{
-			new: true,
-		}
-	)
-		.populate("users", "-password")
-		.populate("groupAdmin", "-password");
-	if (!removed) {
+	const chat = await Chat.findById(chatId);
+
+	if (!chat) {
 		res.status(404);
 		throw new Error("Chat not found");
-	} else {
-		res.json(removed);
 	}
+
+	const isGroupAdmin = chat.groupAdmin.toString() === userId;
+
+	chat.users = chat.users.filter((user) => user._id.toString() !== userId);
+
+	if (isGroupAdmin) {
+		if (chat.users.length > 0) {
+			chat.groupAdmin = chat.users[0]._id; // Assign the next oldest user as the new group admin
+		} else {
+			chat.groupAdmin = null; // Handle the case where the group becomes empty
+		}
+	}
+
+	await chat.save();
+
+	const updatedChat = await Chat.findById(chatId)
+		.populate("users", "-password")
+		.populate("groupAdmin", "-password");
+
+	res.json(updatedChat);
+
+	// const removed = await Chat.findByIdAndUpdate(
+	// 	chatId,
+	// 	{
+	// 		$pull: { users: userId },
+	// 	},
+	// 	{
+	// 		new: true,
+	// 	}
+	// )
+	// 	.populate("users", "-password")
+	// 	.populate("groupAdmin", "-password");
+	// if (!removed) {
+	// 	res.status(404);
+	// 	throw new Error("Chat not found");
+	// } else {
+	// 	res.json(removed);
+	// }
 });
 
 module.exports = {

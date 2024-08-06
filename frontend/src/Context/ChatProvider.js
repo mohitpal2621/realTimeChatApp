@@ -60,6 +60,7 @@ const ChatProvider = ({ children }) => {
 	);
 };
 
+// Helper function so, useContext and ChatContext is not required to be imported in each component
 export const ChatState = () => {
 	return useContext(ChatContext);
 };

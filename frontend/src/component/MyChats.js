@@ -4,11 +4,11 @@ import { Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import ChatLoading from "./ChatLoading";
 import { getSender } from "../config/ChatLogics";
+import GroupChatModal from "./miscellaneous/GroupChatModal";
 
-const MyChats = () => {
+const MyChats = ({ fetchAgain }) => {
 	const [loggedUser, setLoggedUser] = useState();
-	const { user, setUser, selectedChat, setSelectedChat, chats, setChats } =
-		ChatState();
+	const { selectedChat, setSelectedChat, chats, setChats } = ChatState();
 	const toast = useToast();
 
 	const fetchChats = async (req, res) => {
@@ -20,7 +20,6 @@ const MyChats = () => {
 
 			const response = await fetch("/api/chat", config);
 			const data = await response.json();
-			console.log("data in chats:", data);
 			setChats(data);
 		} catch (error) {
 			toast({
@@ -43,7 +42,7 @@ const MyChats = () => {
 
 				if (response.ok) {
 					const data = await response.json();
-					setLoggedUser(data.user);
+					setLoggedUser(data.user); // ???? Why not use the one from ChatProvider
 					await fetchChats();
 				} else {
 					throw new Error("Token Verification Failed");
@@ -55,13 +54,12 @@ const MyChats = () => {
 		};
 
 		getToken();
-	}, []);
+	}, [fetchAgain]);
 
 	if (!loggedUser || !chats) {
 		return <ChatLoading />;
 	}
 
-	console.log("Selected CHat: ", selectedChat);
 	return (
 		<Box
 			display={{ base: selectedChat ? "None" : "flex", md: "flex" }}
@@ -84,13 +82,15 @@ const MyChats = () => {
 				alignItems={"center"}
 			>
 				My chats
-				<Button
-					display={"flex"}
-					fontSize={{ base: "17px", md: "10px", lg: "17px" }}
-					rightIcon={<AddIcon />}
-				>
-					New Group Chat
-				</Button>
+				<GroupChatModal>
+					<Button
+						display={"flex"}
+						fontSize={{ base: "17px", md: "10px", lg: "17px" }}
+						rightIcon={<AddIcon />}
+					>
+						New Group Chat
+					</Button>
+				</GroupChatModal>
 			</Box>
 
 			<Box
@@ -124,7 +124,7 @@ const MyChats = () => {
 							>
 								<Text>
 									{!chat.isGroupChat
-										? getSender(loggedUser, chat.users)
+										? getSender(loggedUser, chat.users) // Why not use 'user' set in chatProvider instead
 										: chat.chatName}
 								</Text>
 							</Box>

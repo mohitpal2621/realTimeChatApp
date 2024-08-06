@@ -20,11 +20,11 @@ app.get("/", (req, res) => {
 	res.send("Api is running");
 });
 
-app.use("/api/verify-token", verifyRoutes);
-
 app.use("/api/user", userRoutes);
 
 app.use("/api/chat", chatRoutes);
+
+app.use("/api/verify-token", verifyRoutes);
 
 app.use(notFound);
 

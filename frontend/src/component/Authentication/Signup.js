@@ -10,7 +10,6 @@ import {
 	useToast,
 	VStack,
 } from "@chakra-ui/react";
-// import axios from "axios";
 
 const Signup = () => {
 	const [show, setShow] = useState(false);

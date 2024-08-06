@@ -46,9 +46,7 @@ const SideDrawer = () => {
 				credentials: "include",
 			});
 
-			const logOut = await response.json();
-
-			console.log(logOut);
+			await response.json();
 
 			if (response.ok) {
 				setUser(null);
@@ -139,6 +137,7 @@ const SideDrawer = () => {
 				p="5px 10px 5px 10px"
 				borderWidth={"5px"}
 			>
+				{/* Search User */}
 				<Tooltip
 					label="Search users to chat"
 					hasArrow
