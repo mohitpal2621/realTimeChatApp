@@ -22,7 +22,7 @@ router.get("/", (req, res) => {
 				return res.status(404).json({ error: "User not found" });
 			}
 
-			// Token is valid, return the user information
+			// Token is valid, return the complete user information
 			res.json({ user });
 		});
 	} catch (error) {

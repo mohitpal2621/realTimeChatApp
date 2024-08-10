@@ -26,7 +26,7 @@ const GroupChatModal = ({ children }) => {
 
 	const toast = useToast();
 
-	const { chats, setChats } = ChatState();
+	const { user, chats, setChats, selectedChat } = ChatState();
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -42,7 +42,7 @@ const GroupChatModal = ({ children }) => {
 				credentials: "include",
 			});
 
-			const data = await response.json();
+			const data = await response.json(); // Returns all complete user documents as array resulting from the search state string, excluding current user
 
 			setLoading(false);
 			setSearchResults(data);
@@ -88,7 +88,7 @@ const GroupChatModal = ({ children }) => {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 			const data = await response.json();
-			setChats([data, ...chats]);
+			setChats([data, ...chats]); // Add the newly created GroupChat to the chats array in the Provider, at the top
 			onClose();
 			toast({
 				title: "Group Chat Created!",
@@ -111,6 +111,17 @@ const GroupChatModal = ({ children }) => {
 	};
 
 	const handleGroup = (userToAdd) => {
+		if (selectedChat.groupAdmin._id !== user._id) {
+			toast({
+				title: "Only admins can add new users",
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+				position: "bottom",
+			});
+			return;
+		}
+
 		if (selectedUsers.includes(userToAdd)) {
 			toast({
 				title: "User already added",
@@ -150,7 +161,7 @@ const GroupChatModal = ({ children }) => {
 						display={"flex"}
 						flexDir={"column"}
 						alignItems={"center"}
-						// justifyContent={"between"}
+						justifyContent={"between"}
 					>
 						<FormControl>
 							<Input
@@ -169,7 +180,7 @@ const GroupChatModal = ({ children }) => {
 							/>
 						</FormControl>
 						<Box w={"100%"} display={"flex"} flexWrap={"wrap"}>
-							{selectedUsers.map((u) => (
+							{selectedUsers?.map((u) => (
 								<UserBadgeItem
 									key={u._id}
 									user={u}

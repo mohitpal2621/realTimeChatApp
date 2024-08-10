@@ -49,7 +49,7 @@ const SideDrawer = () => {
 			await response.json();
 
 			if (response.ok) {
-				setUser(null);
+				setUser(null); // If logout is successful, set user state in Provider to null, so with useEffect in ChatProvider, it redirects to HomePage
 				navigate("/");
 			} else {
 				throw new Error("Logout failed");
@@ -78,7 +78,7 @@ const SideDrawer = () => {
 				credentials: "include",
 			});
 
-			const data = await response.json();
+			const data = await response.json(); // Returns all complete user documents as array resulting from the search state string, excluding current user
 			setLoading(false);
 			setSearchResult(data);
 		} catch (error) {
@@ -106,11 +106,14 @@ const SideDrawer = () => {
 			};
 
 			const response = await fetch("/api/chat", config);
-			const data = await response.json();
+
+			const data = await response.json(); // This gets complete one-on-one chat document if already existing, or else creates a new one and gets it back
 
 			if (!chats.find((c) => c._id === data._id))
+				// If a one-on-one chat was created for the first time, then it is merged to the Chats array state in the Provider context
 				setChats([data, ...chats]);
 
+			// Since this userlistitem was clicked, the selectedChat is set with complete chat document with this and current loggedin user
 			setSelectedChat(data);
 			setLoadingChat(false);
 			onClose();
@@ -207,17 +210,13 @@ const SideDrawer = () => {
 						{loading ? (
 							<ChatLoading />
 						) : (
-							searchResult?.map((user) => {
-								return (
-									<UserListItem
-										key={user._id}
-										user={user}
-										handleFunction={() =>
-											accessChat(user._id)
-										}
-									/>
-								);
-							})
+							searchResult?.map((user) => (
+								<UserListItem
+									key={user._id}
+									user={user}
+									handleFunction={() => accessChat(user._id)}
+								/>
+							))
 						)}
 						{loadingChat && (
 							<Spinner ml={"auto"} display={"flex"} />

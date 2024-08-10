@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { ChatState } from "../Context/ChatProvider";
 import { Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
@@ -7,56 +7,37 @@ import { getSender } from "../config/ChatLogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
 
 const MyChats = ({ fetchAgain }) => {
-	const [loggedUser, setLoggedUser] = useState();
-	const { selectedChat, setSelectedChat, chats, setChats } = ChatState();
+	const { user, selectedChat, setSelectedChat, chats, setChats } =
+		ChatState();
 	const toast = useToast();
 
-	const fetchChats = async (req, res) => {
-		try {
-			const config = {
-				method: "GET",
-				credentials: "include",
-			};
-
-			const response = await fetch("/api/chat", config);
-			const data = await response.json();
-			setChats(data);
-		} catch (error) {
-			toast({
-				title: "Error occured!",
-				description: "Failed to load chats",
-				status: "error",
-				isClosable: true,
-				duration: 5000,
-			});
-		}
-	};
-
 	useEffect(() => {
-		const getToken = async () => {
+		const fetchChats = async () => {
 			try {
-				const response = await fetch("/api/verify-token", {
+				const config = {
 					method: "GET",
 					credentials: "include",
-				});
+				};
 
-				if (response.ok) {
-					const data = await response.json();
-					setLoggedUser(data.user); // ???? Why not use the one from ChatProvider
-					await fetchChats();
-				} else {
-					throw new Error("Token Verification Failed");
-					// navigate("/");
-				}
+				const response = await fetch("/api/chat", config);
+				// Return all complete chat documents array which have current logged in user id as an element in the users array of any chat document
+				const data = await response.json();
+				setChats(data);
 			} catch (error) {
-				console.log(error.message);
+				toast({
+					title: "Error occured!",
+					description: "Failed to load chats",
+					status: "error",
+					isClosable: true,
+					duration: 5000,
+				});
 			}
 		};
 
-		getToken();
+		fetchChats();
 	}, [fetchAgain]);
 
-	if (!loggedUser || !chats) {
+	if (!chats) {
 		return <ChatLoading />;
 	}
 
@@ -124,7 +105,7 @@ const MyChats = ({ fetchAgain }) => {
 							>
 								<Text>
 									{!chat.isGroupChat
-										? getSender(loggedUser, chat.users) // Why not use 'user' set in chatProvider instead
+										? getSender(user, chat.users) // Why not use 'user' set in chatProvider instead
 										: chat.chatName}
 								</Text>
 							</Box>

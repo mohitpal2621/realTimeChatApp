@@ -21,8 +21,9 @@ const protect = asyncHandler(async (req, res, next) => {
 	if (token) {
 		try {
 			const decoded = jwt.verify(token, process.env.SECRET);
+
+			// Appends the whole currently logged user to the incoming req as 'user' property(excluding password), and then calls next middleware
 			req.user = await User.findById(decoded.id).select("-password");
-			// console.log(req.user);
 			next();
 		} catch (error) {
 			res.status(401);

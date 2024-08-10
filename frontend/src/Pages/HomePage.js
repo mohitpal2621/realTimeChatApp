@@ -19,7 +19,7 @@ const HomePage = () => {
 	const { user } = ChatState(); // Get the user state from the ChatProvider context
 
 	useEffect(() => {
-		// If a valid user is present, navigate to "/chats"
+		// If a valid user is present, i.e., logged in, navigate to "/chats"
 		if (user) {
 			navigate("/chats");
 		}

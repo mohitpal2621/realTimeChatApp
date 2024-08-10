@@ -29,6 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
 			sameSite: "Lax",
 		});
 
+		// Returns object containing created user doc with id, name, email and picture (NOT password)
 		res.status(201).json({
 			_id: user._id,
 			name: user.name,
@@ -56,6 +57,7 @@ const authUser = asyncHandler(async (req, res) => {
 			sameSite: "Lax",
 		});
 
+		//Returns an object of the logged in user with complete document excluding the password field
 		res.json({
 			_id: user._id,
 			name: user.name,
@@ -83,8 +85,8 @@ const allUsers = asyncHandler(async (req, res) => {
 		  }
 		: {};
 
-	// Sends array of documents filtered with keyword, and excluding password
-	// from each document, and also excluding the whole document of the current logged user
+	// Sends array of complete user documents filtered with keyword, and excluding password
+	// from each document, and also excluding the complete document of the current logged user
 	const users = await User.find(keyword)
 		.find({ _id: { $ne: req.user._id } })
 		.select("-password");

@@ -26,6 +26,7 @@ const accessChat = asyncHandler(async (req, res) => {
 	});
 
 	if (isChat.length > 0) {
+		// Send back complete one-on-one chat document if already existing
 		res.send(isChat[0]);
 	} else {
 		var chatData = {
@@ -41,6 +42,7 @@ const accessChat = asyncHandler(async (req, res) => {
 				_id: createdChat._id,
 			}).populate("users", "-password");
 
+			// if there was no exisiting one-on-one chat, then create a new one, and send a complete chat document for it
 			res.status(200).send(FullChat);
 		} catch (error) {
 			res.status(400);
@@ -64,6 +66,9 @@ const fetchChats = asyncHandler(async (req, res) => {
 					select: "name picture email",
 				});
 
+				// Find all chat documents whose users array contains a user with id equal to current logged in userId.
+				// Populate that found Chat/Chats, and return all these chats as they are the chats which the current logged in user
+				// is a part of, whether one-on-one or groupChats.
 				res.status(200).send(results);
 			});
 	} catch (error) {
@@ -92,14 +97,15 @@ const createGroupChat = asyncHandler(async (req, res) => {
 			.send("More than two users are required to form a group chat. ");
 	}
 
-	users.push(req.user);
+	users.push(req.user); // Push the currently loggedIn user(complete document) to the users array
 
 	try {
 		const groupChat = await Chat.create({
 			chatName: req.body.name,
 			users: users,
 			isGroupChat: true,
-			groupAdmin: req.user,
+			groupAdmin: req.user, // Create currently loggedIn user as groupAdmin, as only he/she can create groupChat(Though req.user is complete document but still
+			// mongoDb will store only its _id, as the type of groupAdmin field is ObjectId, and it is a ref to User doc)
 		});
 
 		const fullGroupChat = await Chat.findOne({
@@ -108,6 +114,8 @@ const createGroupChat = asyncHandler(async (req, res) => {
 			.populate("users", "-password")
 			.populate("groupAdmin", "-password");
 
+		// Return the created new Group Chat populated completely with the associated users full documents in the users array of it, and also populating the
+		// groupAdmin field completely
 		res.status(200).json(fullGroupChat);
 	} catch (error) {
 		console.error("Error creating group chat: ", error);
@@ -134,6 +142,7 @@ const renameGroup = asyncHandler(async (req, res) => {
 		res.status(404);
 		throw new Error("Chat not found");
 	} else {
+		// Return updated complete chat document with new name, user docs in users array and groupAdmin doc
 		res.json(updatedChat);
 	}
 });
@@ -156,6 +165,7 @@ const addToGroup = asyncHandler(async (req, res) => {
 		res.status(404);
 		throw new Error("Chat not found");
 	} else {
+		// Return updated complete chat document with new user added, user docs in users array and groupAdmin doc
 		res.json(added);
 	}
 });
@@ -170,10 +180,13 @@ const removeFromGroup = asyncHandler(async (req, res) => {
 		throw new Error("Chat not found");
 	}
 
+	// Check if user being removed or leaving is same as groupAdmin of the groupChat
 	const isGroupAdmin = chat.groupAdmin.toString() === userId;
 
+	// Remove the user
 	chat.users = chat.users.filter((user) => user._id.toString() !== userId);
 
+	// If user leaving or being removed is the groupAdmin of the groupChat, make a new groupAdmin for the groupChat
 	if (isGroupAdmin) {
 		if (chat.users.length > 0) {
 			chat.groupAdmin = chat.users[0]._id; // Assign the next oldest user as the new group admin
@@ -188,6 +201,7 @@ const removeFromGroup = asyncHandler(async (req, res) => {
 		.populate("users", "-password")
 		.populate("groupAdmin", "-password");
 
+	// Return the complete updated group chat after removal of the user/groupAdmin from that groupChat
 	res.json(updatedChat);
 
 	// const removed = await Chat.findByIdAndUpdate(

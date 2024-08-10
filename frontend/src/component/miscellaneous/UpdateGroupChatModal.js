@@ -29,7 +29,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 
 	const toast = useToast();
 
-	const { selectedChat, setSelectedChat, user } = ChatState();
+	const { user, selectedChat, setSelectedChat } = ChatState();
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -103,9 +103,9 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 	};
 
 	const handleAddUser = async (user1) => {
-		if (selectedChat.users.find((u) => u._id === user1._id)) {
+		if (selectedChat.groupAdmin._id !== user._id) {
 			toast({
-				title: "User already in group",
+				title: "Only admins can add new users",
 				status: "error",
 				duration: 5000,
 				isClosable: true,
@@ -114,9 +114,9 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 			return;
 		}
 
-		if (selectedChat.groupAdmin._id !== user._id) {
+		if (selectedChat.users.find((u) => u._id === user1._id)) {
 			toast({
-				title: "Only admins can add new users",
+				title: "User already in group",
 				status: "error",
 				duration: 5000,
 				isClosable: true,
@@ -159,10 +159,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 	};
 
 	const handleRemove = async (userToRemove) => {
-		if (
-			selectedChat.groupAdmin._id !== user._id &&
-			user._id !== userToRemove._id
-		) {
+		if (selectedChat.groupAdmin._id !== user._id) {
 			toast({
 				title: "You do not have permission to remove users",
 				status: "error",
@@ -211,7 +208,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 				? setSelectedChat()
 				: setSelectedChat(data);
 
-			setFetchAgain(!fetchAgain);
+			setFetchAgain(!fetchAgain); // Make the MyChats be reloaded, so the changes are reflected on the MyChats
 			setLoading(false);
 		} catch (error) {
 			toast({
@@ -317,6 +314,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 								variant={"solid"}
 								colorScheme="teal"
 								ml={1}
+								mb={3}
 								isLoading={renameLoading}
 								onClick={handleRename}
 							>
@@ -325,7 +323,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 						</FormControl>
 						<FormControl>
 							<Input
-								placeContent={"Add user to group"}
+								placeholder={"Add user to group"}
 								mb={1}
 								onChange={(e) => handleSearch(e.target.value)}
 							/>

@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 const ChatContext = createContext();
 
 const ChatProvider = ({ children }) => {
-	const [user, setUser] = useState();
-	const [selectedChat, setSelectedChat] = useState();
-	const [chats, setChats] = useState([]);
+	const [user, setUser] = useState(); // To keep track of currently logged in user(complete document)
+	const [selectedChat, setSelectedChat] = useState(); // To Keep track of currently selected chat/groupChat(complete chat document), if not selected then set as null
+	const [chats, setChats] = useState([]); // Keep track of all chats/groupChats which current logged in user is a part of
 
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
@@ -21,13 +21,13 @@ const ChatProvider = ({ children }) => {
 
 				if (response.ok) {
 					const data = await response.json();
-					setUser(data.user);
+					setUser(data.user); // Set complete document of currently logged in user to user state
 				} else {
 					throw new Error("Token Verification Failed");
 					// navigate("/");
 				}
 			} catch (error) {
-				setUser(null);
+				setUser(null); // If there is no user currently logged in set User state to null and navigate to HomePage(Login/Signup)
 				navigate("/");
 			} finally {
 				setLoading(false);
@@ -38,7 +38,7 @@ const ChatProvider = ({ children }) => {
 	}, [navigate]);
 
 	useEffect(() => {
-		// Redirect to login page if no user and not loading
+		// Redirect to login page if no user logged in and not loading
 		if (!loading && !user) {
 			navigate("/");
 		}
