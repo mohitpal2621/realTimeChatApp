@@ -35,7 +35,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 
 		// console.log(chat);
 
-		res.json(message);
+		res.json(message); // Creates a new Message doc, and sends it back complete
 	} catch (error) {
 		res.status(400);
 		throw new Error(error.message);
@@ -50,7 +50,7 @@ const allMessages = asyncHandler(async (req, res) => {
 			.populate("sender", "name picture email")
 			.populate("chat");
 
-		res.json(messages);
+		res.json(messages); // Sends an array of complete Message docs of  particular chat(by ChatId)
 	} catch (error) {
 		res.status(400);
 		throw new Error(error.message);

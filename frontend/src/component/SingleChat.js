@@ -1,13 +1,105 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ChatState } from "../Context/ChatProvider";
-import { Box, IconButton, Text } from "@chakra-ui/react";
+import {
+	Box,
+	FormControl,
+	IconButton,
+	Input,
+	Spinner,
+	Text,
+	useToast,
+} from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import ProfileModal from "./miscellaneous/ProfileModal";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
+import "./styles.css";
+import ScrollableChat from "./ScrollableChat";
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
+	const [messages, setMessages] = useState([]);
+	const [newMessage, setNewMessage] = useState();
+	const [loading, setLoading] = useState(false);
+
 	const { user, selectedChat, setSelectedChat } = ChatState();
+
+	const toast = useToast();
+
+	const fetchMessages = async () => {
+		if (!selectedChat) return;
+
+		try {
+			const config = {
+				method: "GET",
+				credentials: "include",
+			};
+
+			setLoading(true);
+
+			const response = await fetch(
+				`/api/message/${selectedChat._id}`,
+				config
+			);
+
+			const data = await response.json();
+			// console.log(data);
+
+			setMessages(data);
+			setLoading(false);
+		} catch (error) {
+			toast({
+				title: "Error occured",
+				description: "Failed to fetch and load all messages",
+				status: "error",
+				duration: 5000,
+				isClosable: true,
+				position: "bottom",
+			});
+		}
+	};
+
+	useEffect(() => {
+		fetchMessages();
+	}, [selectedChat]);
+
+	const sendMessage = async (event) => {
+		if (event.key === "Enter" && newMessage) {
+			try {
+				const config = {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						content: newMessage,
+						chatId: selectedChat._id,
+					}),
+					credentials: "include",
+				};
+
+				setNewMessage("");
+
+				const response = await fetch("/api/message", config);
+
+				const data = await response.json();
+
+				setMessages([...messages, data]);
+			} catch (error) {
+				toast({
+					title: "Error sending message",
+					description: "Error was not sent to the receipient",
+					status: "error",
+					duration: 5000,
+					isClosable: true,
+					position: "bottom",
+				});
+			}
+		}
+	};
+
+	const typingHandler = (e) => {
+		setNewMessage(e.target.value);
+	};
 
 	return (
 		<>
@@ -44,6 +136,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 								<UpdateGroupChatModal
 									fetchAgain={fetchAgain}
 									setFetchAgain={setFetchAgain}
+									fetchMessages={fetchMessages}
 								/>
 							</>
 						)}
@@ -59,7 +152,28 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 						borderRadius={"lg"}
 						overflowY={"hidden"}
 					>
-						{/* Messages here */}
+						{loading ? (
+							<Spinner
+								size={"xl"}
+								w={20}
+								h={20}
+								alignSelf={"center"}
+								margin={"auto"}
+							/>
+						) : (
+							<div className="messages">
+								<ScrollableChat messages={messages} />
+							</div>
+						)}
+						<FormControl onKeyDown={sendMessage} isRequired mt={3}>
+							<Input
+								variant={"filled"}
+								bg={"#E0E0E0"}
+								placeholder="Enter a message"
+								onChange={typingHandler}
+								value={newMessage}
+							/>
+						</FormControl>
 					</Box>
 				</>
 			) : (

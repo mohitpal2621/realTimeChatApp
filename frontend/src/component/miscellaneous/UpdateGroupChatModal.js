@@ -21,7 +21,7 @@ import { ChatState } from "../../Context/ChatProvider";
 import UserBadgeItem from "../UserAvatar/userBadgeItem";
 import UserListItem from "../UserAvatar/UserListItem";
 
-const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
+const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
 	const [groupChatName, setGroupChatName] = useState("");
 	const [searchResult, setSearchResult] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -209,6 +209,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 				: setSelectedChat(data);
 
 			setFetchAgain(!fetchAgain); // Make the MyChats be reloaded, so the changes are reflected on the MyChats
+			fetchMessages();
 			setLoading(false);
 		} catch (error) {
 			toast({
@@ -260,6 +261,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
 
 			setSelectedChat();
 			setFetchAgain(!fetchAgain);
+			fetchMessages();
 			setLoading(false);
 		} catch (error) {}
 	};
