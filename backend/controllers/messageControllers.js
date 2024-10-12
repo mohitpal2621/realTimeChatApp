@@ -7,7 +7,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 	const { content, chatId } = req.body;
 
 	if (!content || !chatId) {
-		console.log("Invalid data passed into request");
+		console.error("Invalid data passed into request");
 		return res.sendStatus(400);
 	}
 
@@ -31,8 +31,6 @@ const sendMessage = asyncHandler(async (req, res) => {
 		const chat = await Chat.findByIdAndUpdate(req.body.chatId, {
 			latestMessage: message,
 		});
-
-		// console.log(chat);
 
 		res.json(message); // Creates a new Message doc, and sends it back complete
 	} catch (error) {

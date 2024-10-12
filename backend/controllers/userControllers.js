@@ -4,44 +4,25 @@ const generateToken = require("../config/generateToken");
 
 const registerUser = asyncHandler(async (req, res) => {
 	let { name, email, password, picture } = req.body;
-	console.log("herer");
 
 	if (!name || !email || !password) {
 		res.status(400);
 		throw new Error("Please enter all the fields");
 	}
 
-	console.log("now eere");
-
 	const userExists = await User.findOne({ email });
 
-	console.log("aaaaa");
 	if (userExists) {
 		res.status(400);
 		throw new Error("User already exists");
 	}
-	console.log("xxxxx");
-
 	if (!picture || picture?.trim() === "") {
 		picture = undefined;
 	}
-	console.log("qqqqqqqqq");
-
-	console.log("pciture: ", picture);
 
 	const user = await User.create({ name, email, password, picture });
-	console.log("user: ", user);
 
 	if (user) {
-		const token = generateToken(user._id);
-
-		res.cookie("tokenId", token, {
-			httpOnly: true,
-			secure: process.env.NODE_ENV === "production",
-			maxAge: 30 * 24 * 60 * 60 * 1000,
-			sameSite: "Lax",
-		});
-
 		// Returns object containing created user doc with id, name, email and picture (NOT password)
 		res.status(201).json({
 			_id: user._id,
@@ -77,7 +58,6 @@ const authUser = asyncHandler(async (req, res) => {
 			email: user.email,
 			picture: user.picture,
 		});
-		console.log("DONE you are Logged IN");
 	} else {
 		throw new Error("Invalid email or password");
 	}

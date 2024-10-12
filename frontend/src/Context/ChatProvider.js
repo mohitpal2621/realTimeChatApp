@@ -7,6 +7,7 @@ const ChatProvider = ({ children }) => {
 	const [user, setUser] = useState(); // To keep track of currently logged in user(complete document)
 	const [selectedChat, setSelectedChat] = useState(); // To Keep track of currently selected chat/groupChat(complete chat document), if not selected then set as null
 	const [chats, setChats] = useState([]); // Keep track of all chats/groupChats which current logged in user is a part of
+	const [notification, setNotification] = useState([]);
 
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
@@ -48,11 +49,13 @@ const ChatProvider = ({ children }) => {
 		<ChatContext.Provider
 			value={{
 				user,
-				setUser,
-				selectedChat,
-				setSelectedChat,
 				chats,
+				selectedChat,
+				notification,
+				setUser,
+				setSelectedChat,
 				setChats,
+				setNotification,
 			}}
 		>
 			{children}

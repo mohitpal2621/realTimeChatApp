@@ -53,9 +53,10 @@ const Login = () => {
 					password,
 				}),
 			});
-			console.log(response);
+
+			const data = await response.json();
+
 			if (!response.ok) {
-				console.log("vvvvv");
 				toast({
 					title: "Wrong Credentials",
 					status: "error",
@@ -67,7 +68,6 @@ const Login = () => {
 				return;
 			}
 
-			await response.json();
 			toast({
 				title: "Login successful",
 				status: "success",

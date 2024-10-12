@@ -84,7 +84,6 @@ const GroupChatModal = ({ children }) => {
 
 		try {
 			const response = await fetch("/api/chat/group", config);
-
 			if (!response.ok) {
 				if (response.status === 422)
 					throw new Error(
@@ -103,7 +102,7 @@ const GroupChatModal = ({ children }) => {
 				position: "bottom",
 			});
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 			toast({
 				title: "Failed to create group chat",
 				description: error.message,

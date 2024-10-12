@@ -6,7 +6,7 @@ const accessChat = asyncHandler(async (req, res) => {
 	const { userId } = req.body;
 
 	if (!userId) {
-		console.log("UserId param not sent with request");
+		console.error("UserId param not sent with request");
 		return res.sendStatus(400);
 	}
 
@@ -87,13 +87,11 @@ const createGroupChat = asyncHandler(async (req, res) => {
 
 	try {
 		users = JSON.parse(req.body.users);
-		console.log("asfsdf");
 	} catch (error) {
 		return res.status(400).send({ message: "Invalid users format" });
 	}
 
 	if (users.length < 2) {
-		console.log("1111111111");
 		return res
 			.status(422)
 			.send("More than two users are required to form a group chat. ");
@@ -109,14 +107,13 @@ const createGroupChat = asyncHandler(async (req, res) => {
 			groupAdmin: req.user, // Create currently loggedIn user as groupAdmin, as only he/she can create groupChat(Though req.user is complete document but still
 			// mongoDb will store only its _id, as the type of groupAdmin field is ObjectId, and it is a ref to User doc)
 		});
-		console.log("object");
 
 		const fullGroupChat = await Chat.findOne({
 			_id: groupChat._id,
 		})
 			.populate("users", "-password")
 			.populate("groupAdmin", "-password");
-		console.log("0fy");
+
 		// Return the created new Group Chat populated completely with the associated users full documents in the users array of it, and also populating the
 		// groupAdmin field completely
 		res.status(200).json(fullGroupChat);

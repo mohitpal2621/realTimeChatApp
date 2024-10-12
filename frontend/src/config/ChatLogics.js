@@ -3,14 +3,7 @@ export const getSender = (loggedUser, users) => {
 };
 
 export const getSenderFull = (loggedUser, users) => {
-	if (users[0]._id === loggedUser._id) {
-		console.log("users[1]: ", users[1]);
-		return users[1];
-	} else {
-		console.log("users[0]: ", users[1]);
-		return users[0];
-	}
-	// return users[0]._id === loggedUser._id ? users[1] : users[0];
+	return users[0]._id === loggedUser._id ? users[1] : users[0];
 };
 
 export const isSameSender = (messages, msg, i, userId) => {

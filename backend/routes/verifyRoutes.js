@@ -18,7 +18,7 @@ router.get("/", (req, res) => {
 
 			const user = await User.findById(decoded.id).select("-password");
 			if (!user) {
-				console.error("User not found for id: ", decoded.id);
+				console.error("User not found for token:", decoded.id);
 				return res.status(404).json({ error: "User not found" });
 			}
 
