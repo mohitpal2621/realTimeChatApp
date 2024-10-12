@@ -20,7 +20,6 @@ const sendMessage = asyncHandler(async (req, res) => {
 	try {
 		let message = await Message.create(newMessage);
 
-		// Why execPopulate
 		message = await message.populate("sender", "name picture");
 
 		message = await message.populate("chat");
