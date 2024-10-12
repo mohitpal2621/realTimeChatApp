@@ -84,7 +84,12 @@ const GroupChatModal = ({ children }) => {
 
 		try {
 			const response = await fetch("/api/chat/group", config);
+
 			if (!response.ok) {
+				if (response.status === 422)
+					throw new Error(
+						`Less than two users are not allowed to form a groupchat`
+					);
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 			const data = await response.json();
@@ -101,7 +106,7 @@ const GroupChatModal = ({ children }) => {
 			console.log(error);
 			toast({
 				title: "Failed to create group chat",
-				description: error,
+				description: error.message,
 				status: "error",
 				duration: 5000,
 				isClosable: true,
@@ -111,15 +116,17 @@ const GroupChatModal = ({ children }) => {
 	};
 
 	const handleGroup = (userToAdd) => {
-		if (selectedChat.groupAdmin._id !== user._id) {
-			toast({
-				title: "Only admins can add new users",
-				status: "error",
-				duration: 5000,
-				isClosable: true,
-				position: "bottom",
-			});
-			return;
+		if (selectedChat) {
+			if (selectedChat?.groupAdmin._id !== user._id) {
+				toast({
+					title: "Only admins can add new users",
+					status: "error",
+					duration: 5000,
+					isClosable: true,
+					position: "bottom",
+				});
+				return;
+			}
 		}
 
 		if (selectedUsers.includes(userToAdd)) {

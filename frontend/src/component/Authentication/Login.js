@@ -53,13 +53,21 @@ const Login = () => {
 					password,
 				}),
 			});
-
-			const data = await response.json();
-
+			console.log(response);
 			if (!response.ok) {
-				throw new Error(data.message || "Something went wrong");
+				console.log("vvvvv");
+				toast({
+					title: "Wrong Credentials",
+					status: "error",
+					duration: 5000,
+					isClosable: true,
+					position: "bottom",
+				});
+				setLoading(false);
+				return;
 			}
 
+			await response.json();
 			toast({
 				title: "Login successful",
 				status: "success",
