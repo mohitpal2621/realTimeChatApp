@@ -105,7 +105,6 @@ const Signup = () => {
 					"Content-Type": "application/json",
 				},
 			};
-			console.log("object1");
 			const response = await fetch("/api/user", {
 				method: "POST",
 				headers: config.headers,
@@ -116,8 +115,6 @@ const Signup = () => {
 					picture: pic,
 				}),
 			});
-			console.log(response);
-			console.log("object2");
 
 			if (!response.ok) {
 				// throw new Error(data.message || "Something went wrong");
@@ -141,7 +138,6 @@ const Signup = () => {
 			setLoading(false);
 			navigate("/chats");
 		} catch (error) {
-			console.log("HEHEHHE");
 			toast({
 				title: "Error occured!",
 				description: error.response.data.message,
