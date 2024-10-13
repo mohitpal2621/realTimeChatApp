@@ -54,8 +54,6 @@ const Login = () => {
 				}),
 			});
 
-			const data = await response.json();
-
 			if (!response.ok) {
 				toast({
 					title: "Wrong Credentials",

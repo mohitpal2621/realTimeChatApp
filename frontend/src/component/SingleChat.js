@@ -85,6 +85,33 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 		}
 	};
 
+	// Function to mark messages as read
+	const markMessagesAsRead = async () => {
+		if (!selectedChat) return; // Ensure selectedChat exists
+
+		try {
+			const config = {
+				method: "PUT",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			};
+
+			// Loop through messages and mark as read
+			messages.forEach(async (message) => {
+				if (!message.readBy.includes(user._id)) {
+					await fetch(`/api/message/${message._id}/read`, config);
+				}
+			});
+
+			// Update notification state (optional, adjust as necessary)
+			setNotification(notification.filter((n) => !messages.includes(n)));
+		} catch (error) {
+			console.error("Error marking messages as read", error);
+		}
+	};
+
 	useEffect(() => {
 		socket = io(ENDPOINT);
 		socket.emit("setup", user);
@@ -96,6 +123,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 	useEffect(() => {
 		fetchMessages();
 		selectedChatCompare = selectedChat;
+
+		if (selectedChat) {
+			markMessagesAsRead(); // Mark unread messages as read
+		}
 	}, [selectedChat]);
 
 	useEffect(() => {

@@ -54,4 +54,40 @@ const allMessages = asyncHandler(async (req, res) => {
 	}
 });
 
-module.exports = { sendMessage, allMessages };
+const getUnread = asyncHandler(async (req, res) => {
+	const chats = await Chat.find({ users: { $in: [req.user._id] } });
+
+	// Get the chat IDs
+	const chatIds = chats.map((chat) => chat._id);
+
+	// Find all messages in those chats that haven't been read by the user
+	const unreadMessages = await Message.find({
+		chat: { $in: chatIds },
+		readBy: { $ne: req.user._id }, // Find messages where the user hasn't read it
+	})
+		.populate("sender", "name picture")
+		.populate("chat");
+
+	res.json(unreadMessages);
+});
+
+const markMessageAsRead = asyncHandler(async (req, res) => {
+	const messageId = req.params.messageId;
+	const userId = req.user._id;
+
+	const message = await Message.findById(messageId);
+
+	if (!message) {
+		res.status(404);
+		throw new Error("Message not found");
+	}
+
+	if (!message.readBy.includes(userId)) {
+		message.readBy.push(userId);
+		await message.save(); // Save the updated message
+	}
+
+	res.status(200).json({ success: true, message: "Message marked as read" });
+});
+
+module.exports = { sendMessage, allMessages, getUnread, markMessageAsRead };

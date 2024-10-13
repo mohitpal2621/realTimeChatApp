@@ -45,6 +45,28 @@ const ChatProvider = ({ children }) => {
 		}
 	}, [loading, user, navigate]);
 
+	useEffect(() => {
+		const fetchUnreadNotifications = async () => {
+			try {
+				const response = await fetch("/api/message/unread", {
+					method: "GET",
+					credentials: "include",
+				});
+
+				if (response.ok) {
+					const data = await response.json();
+					setNotification(data);
+				}
+			} catch (error) {
+				console.error("Error fetching unread notifications:", error);
+			}
+		};
+
+		if (user) {
+			fetchUnreadNotifications();
+		}
+	}, [user]);
+
 	return (
 		<ChatContext.Provider
 			value={{
